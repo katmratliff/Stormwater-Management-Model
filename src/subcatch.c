@@ -95,6 +95,8 @@ static  char *RunoffRoutingWords[] = { w_OUTLET,  w_IMPERV, w_PERV, NULL};
 //  subcatch_getFracPerv       (called from gwater_initState)
 //  subcatch_getStorage        (called from massbal_getRunoffError)
 //  subcatch_getDepth          (called from findPondedLoads in surfqual.c)
+//  subcatch_getBuildup        (called from stats_updateSubcatchStats)
+//  subcatch_getConcPonded     (called from stats_updateSubcatchStats)
 
 //  subcatch_getWtdOutflow     (called from addWetWeatherInflows in routing.c)
 //  subcatch_getResults        (called from output_saveSubcatchResults)
@@ -808,6 +810,33 @@ double subcatch_getBuildup(int j, int p)
     }
 
     return load;
+}
+
+//=============================================================================
+
+double subcatch_getConcPonded(int j, int p)
+//
+// Input:   j = subcatchment index
+//          p = pollutant index
+// Output:  returns concentration of ponded water on a subcatchment (mass/ft3)
+// Purpose: finds average concentration of a pollutant in a subcatchment's
+//          ponded water
+//
+{
+    int i;
+    double cPonded = 0.0;
+    double nonLidArea = Subcatch[j].area;
+
+    // --- subcatchment and non-LID areas
+    if ( Subcatch[j].area == Subcatch[j].lidArea ) return cPonded;
+    nonLidArea -= Subcatch[j].lidArea;
+
+    if (Subcatch[j].pondedQual[p] > 0.0)
+    {
+        cPonded = (subcatch_getDepth(j) * nonLidArea) / Subcatch[j].pondedQual[p];
+    }
+    
+    return cPonded;
 }
 
 //=============================================================================

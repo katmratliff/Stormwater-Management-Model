@@ -132,15 +132,29 @@ int  stats_open()
             {
                 SubcatchStats[j].surfaceBuildup =
                     (double *) calloc(Nobjects[POLLUT], sizeof(double));
+                SubcatchStats[j].cPonded = 
+                    (double *) calloc(Nobjects[POLLUT], sizeof(double));
                 if ( !SubcatchStats[j].surfaceBuildup )
                 {
                     report_writeErrorMsg(ERR_MEMORY, "");
                     return ErrorCode;
                 }
+                if ( !SubcatchStats[j].cPonded )
+                {
+                    report_writeErrorMsg(ERR_MEMORY, "");
+                    return ErrorCode;
+                }                
                 for ( p = 0; p < Nobjects[POLLUT]; p++ )
+                {
                     SubcatchStats[j].surfaceBuildup[p] = 0.0;
+                    SubcatchStats[j].cPonded[p] = 0.0;
+                }
             }
-            else SubcatchStats[j].surfaceBuildup = NULL;
+            else
+            {    
+                SubcatchStats[j].surfaceBuildup = NULL;
+                SubcatchStats[j].cPonded = NULL;
+            }
         }
 
 ////  Added to release 5.1.008.  ////                                          //(5.1.008)
@@ -309,10 +323,13 @@ void  stats_close()
 {
     int j;
 
-    if ( SubcatchStats)
+    if ( SubcatchStats )
     {
         for ( j=0; j<Nobjects[SUBCATCH]; j++ )
+        {
             FREE(SubcatchStats[j].surfaceBuildup);
+            FREE(SubcatchStats[j].cPonded);
+        }
         FREE(SubcatchStats);
     }
     FREE(NodeStats);
@@ -379,6 +396,7 @@ void   stats_updateSubcatchStats(int j, double rainVol, double runonVol,
     for ( p = 0; p < Nobjects[POLLUT]; p++ )
     {
         SubcatchStats[j].surfaceBuildup[p] = subcatch_getBuildup( j, p );
+        SubcatchStats[j].cPonded[p] = subcatch_getConcPonded( j, p );
     }
         
 }
@@ -1075,12 +1093,14 @@ int stats_getSubcatchStat(int index, TSubcatchStats *subcatchStats)
 		// Copy Structure
 		memcpy(subcatchStats, &SubcatchStats[index], sizeof(TSubcatchStats));
         
-        // Perform Deep Copy of Pollutant Buildup Results
+        // Perform Deep Copy of Pollutant Results
         if (Nobjects[POLLUT] > 0)
         {
             subcatchStats->surfaceBuildup =
                 (double *)calloc(Nobjects[POLLUT], sizeof(double));
-            if (!subcatchStats->surfaceBuildup)
+            subcatchStats->cPonded =
+                (double *)calloc(Nobjects[POLLUT], sizeof(double));            
+            if (!subcatchStats->surfaceBuildup || !subcatchStats->cPonded)
             {
                 errorcode = ERR_MEMORY;
             }
@@ -1088,10 +1108,15 @@ int stats_getSubcatchStat(int index, TSubcatchStats *subcatchStats)
             {
                 for (p = 0; p < Nobjects[POLLUT]; p++)
                     subcatchStats->surfaceBuildup[p] = SubcatchStats[index].surfaceBuildup[p];
+                for (p = 0; p < Nobjects[POLLUT]; p++)
+                    subcatchStats->cPonded[p] = SubcatchStats[index].cPonded[p];
             }
         }
-        else subcatchStats->surfaceBuildup = NULL;
+        else
+        {
+            subcatchStats->surfaceBuildup = NULL;
+            subcatchStats->cPonded = NULL;
+        }
 	}
 	return errorcode;
 }
-

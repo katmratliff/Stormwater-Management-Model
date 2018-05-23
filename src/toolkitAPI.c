@@ -1061,11 +1061,13 @@ int DLLEXPORT swmm_getOutfallStats(int index, SM_OutfallStats *outfallStats)
         if (Nobjects[POLLUT] > 0)
         {
             for (p = 0; p < Nobjects[POLLUT]; p++)
+            {
                 outfallStats->totalLoad[p] *= (LperFT3 * Pollut[p].mcf);
                 if (Pollut[p].units == COUNT)
                 {
                     outfallStats->totalLoad[p] = LOG10(outfallStats->totalLoad[p]);
                 }
+            }
         }
     }
 
@@ -1158,8 +1160,8 @@ int DLLEXPORT swmm_getSubcatchStats(int index, SM_SubcatchStats *subcatchStats)
 // Output:  Subcatchment Stats Structure (SM_SubcatchStats)
 // Return:  API Error
 // Purpose: Gets Subcatchment Stats and Converts Units
-// Note: Caller is responsible for calling swmm_freeSubcatchStats
-//       to free the pollutants array.
+// Note:    Caller is responsible for calling swmm_freeSubcatchStats
+//          to free the pollutants array.
 {
     int p;
 
@@ -1185,12 +1187,19 @@ int DLLEXPORT swmm_getSubcatchStats(int index, SM_SubcatchStats *subcatchStats)
         if (Nobjects[POLLUT] > 0)
         {
             for (p = 0; p < Nobjects[POLLUT]; p++)
+            {
+                // Subcatchment Surface Buildup
                 subcatchStats->surfaceBuildup[p] /= (a * UCF(LANDAREA));
+                // Concentration of Pollutant in Ponded Water on Subcatchment
+                subcatchStats->cPonded[p] /= (LperFT3 * Pollut[p].mcf);
                 if (Pollut[p].units == COUNT)
                 {
                     subcatchStats->surfaceBuildup[p] =
                         LOG10(subcatchStats->surfaceBuildup[p]);
+                    subcatchStats->cPonded[p] =
+                        LOG10(subcatchStats->cPonded[p]);
                 }
+            }
         }
     }
 
@@ -1206,6 +1215,7 @@ void DLLEXPORT swmm_freeSubcatchStats(SM_SubcatchStats *subcatchStats)
 //          since this function performs a memory allocation.
 {
     FREE(subcatchStats->surfaceBuildup);
+    FREE(subcatchStats->cPonded);
 }
 
 int DLLEXPORT swmm_getSystemRoutingStats(SM_RoutingTotals *routingTot)

@@ -970,6 +970,7 @@ typedef struct
     double       runoff;
     double       maxFlow;
     double*      surfaceBuildup;
+    double*      cPonded;
 }  TSubcatchStats;
 
 

@@ -260,6 +260,7 @@ typedef struct
     double       runoff;
     double       maxFlow;
     double*      surfaceBuildup;
+    double*      cPonded;
 }  SM_SubcatchStats;
 
 /// System routing stats structure
