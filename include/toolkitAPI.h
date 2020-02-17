@@ -150,6 +150,11 @@ typedef enum {
     SM_LATINFLOW      = 7   /**< Lateral Inflow Rate */
 } SM_NodeResult;
 
+/// Node pollutant result property codes
+typedef enum {
+    SM_NODEQUAL       = 0,  /**< Current Node Quality */
+} SM_NodePollut;
+
 /// Link result property codes
 typedef enum {
     SM_LINKFLOW        = 0,  /**< Flowrate */
@@ -161,6 +166,12 @@ typedef enum {
     SM_TARGETSETTING   = 6,  /**< Target Setting */
     SM_FROUDE          = 7   /**< Froude Number */
 } SM_LinkResult;
+
+/// Link pollutant result property codes
+typedef enum {
+    SM_LINKQUAL      = 0,  /**< Current Link Quality */
+    SM_TOTALLOAD     = 1,  /**< Total Quality Mass Loading */
+} SM_LinkPollut;
 
 /// Subcatchment result property codes
 typedef enum {
@@ -174,8 +185,10 @@ typedef enum {
 
 /// Subcatchment pollutant result property codes
 typedef enum {
-    SM_BUILDUP      = 0,  /**< Pollutant Buildup Load */
-    SM_CPONDED      = 1,  /**< Ponded Pollutant Concentration */
+    SM_BUILDUP        = 0,  /**< Pollutant Buildup Load */
+    SM_CPONDED        = 1,  /**< Ponded Pollutant Concentration */
+    SM_SUBCQUAL       = 2,  /**< Current Pollutant Runoff Quality */
+    SM_SUBCTOTALLOAD  = 3,  /**< Total Pollutant Washoff load */
 } SM_SubcPollut;
 
 /// Gage precip array property codes
@@ -770,14 +783,6 @@ int DLLEXPORT swmm_setLidUOption(int index, int lidIndex, int Param, int value);
 int DLLEXPORT swmm_getLidCOverflow(int lidControlIndex, char *condition);
 
 /**
- @brief Set the lid control's surface immediate overflow condition
- @param lidControlIndex The index of specified lid control
- @param condition The new value for the surface immediate overflow condition
- @return Error code
-*/
-int DLLEXPORT swmm_setLidCOverflow(int lidControlIndex, char condition);
-
-/**
  @brief Get a property value for specified lid control
  @param lidControlIndex The index of specified lid control
  @param layerIndex The index of specified lid layer (See @ref SM_LidLayer)
@@ -934,6 +939,15 @@ int DLLEXPORT swmm_getCurrentDateTime(int *year, int *month, int *day,
 int DLLEXPORT swmm_getNodeResult(int index, int type, double *result);
 
 /**
+ @brief Gets pollutant values for a specified node.
+ @param index The index of a node
+ @param type The property type code (see @ref SM_NodePollut)
+ @param[out] PollutArray result array
+ @return Error code
+*/
+int DLLEXPORT swmm_getNodePollut(int index, int type, double **PollutArray);
+
+/**
  @brief Get a result value for specified link.
  @param index The index of a link
  @param type The property type code (See @ref SM_LinkResult)
@@ -941,6 +955,15 @@ int DLLEXPORT swmm_getNodeResult(int index, int type, double *result);
  @return Error code
 */
 int DLLEXPORT swmm_getLinkResult(int index, int type, double *result);
+
+/**
+ @brief Gets pollutant values for a specified link.
+ @param index The index of a link
+ @param type The property type code (see @ref SM_LinkPollut)
+ @param[out] PollutArray result array
+ @return Error code
+*/
+int DLLEXPORT swmm_getLinkPollut(int index, int type, double **PollutArray);
 
 /**
  @brief Get a result value for specified subcatchment.
